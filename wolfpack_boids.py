@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul  2 02:52:04 2020
-
-@author: Hal
-"""
-
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul  2 02:24:25 2020
-
-@author: Hal
-
+this is all proof-of-concept stuff, so im not too fussed about global variable bad practices
 """
 import pygame
 from pygame.math import Vector2
@@ -22,24 +12,24 @@ import random
 
 pygame.init()
 
-N = 200
+N = 200 #number of agents
 
 FPS = 30
 bgcolor = (0,0,0)
 
 global wolf_list, sheep_list, Nx, Ny
 wolf_list, sheep_list = [],[]
-Nx, Ny = 1280,720
+Nx, Ny = 1280,720 #screen resolution
 
-global screen, field, debugsurf
-screen = pygame.display.set_mode((Nx,Ny))
-field = pygame.Surface( (Nx,Ny), pygame.SRCALPHA )
-debugsurf = pygame.Surface( (Nx,Ny), pygame.SRCALPHA )
+global screen, field, debugsurf #set up the three drawable surfaces
+screen = pygame.display.set_mode((Nx,Ny)) #display
+field = pygame.Surface( (Nx,Ny), pygame.SRCALPHA ) #game field
+debugsurf = pygame.Surface( (Nx,Ny), pygame.SRCALPHA ) #debug layer (for drawing trails, grids, etc on)
 
 
 screen.fill(bgcolor)
 field.fill( (255,255,255) )
-debugsurf.fill( (0,0,0,0))
+debugsurf.fill( (0,0,0,0)) #transparent at first
 
 screen.blit(field, (0,0))
 screen.blit(debugsurf,(0,0))
@@ -48,12 +38,12 @@ pygame.display.set_caption("Wolfpack")
 clock = pygame.time.Clock()
 
 
-grid_size = 50 #this determines the boid vision range
+grid_size = 50 #this determines the boid vision range, each boid can see in a circle with radius "grid_size"
 bar_width = 1
-Gx = -2
-Gy = -2 #note there will be Gy + 1 actual squares to correspont to Gy gridlines
 
 #DRAW GRID on overlay
+Gx = -2
+Gy = -2 #note there will be Gy + 1 actual squares to correspont to Gy gridlines
 for i in range(0,Nx+grid_size,grid_size):
     pygame.draw.rect(debugsurf, (0,0,255,10), (i, 0, bar_width, Ny) )
     Gx += 1
@@ -63,6 +53,8 @@ for j in range(0,Ny+grid_size,grid_size):
     
 boid_list = []
 target_list = []
+
+""" -------- UTILITY FUNCTIONS -------- """
 
 def norm(vec):
     return sum([i**2 for i in vec])
@@ -83,7 +75,31 @@ def measure_distance(vec1, vec2,normal=False):
         return math.sqrt(best_norm), best.normalize() #is this needed?
     else:
         return math.sqrt(best_norm)
+def debug_search(targ,rg=5):
+    neighbours = []
+    for i in range(-rg,rg+1):
+        for j in range(-rg,rg+1):
+            tx, ty = (targ.gx + i)%Gx, (targ.gy + j)%Gy
+            print(tx,ty)
+            neighbours += grid_table[(tx,ty)]
+    return [i for i in neighbours if i != targ] 
+
+def place_agents():
+    for n in range(1,N):   
+        pos = Vector2(random.random()*Nx, random.random()*Ny)
+        boid_list.append(Wolf(n,pos))
+    target = Sheep(N)
+    boid_list.append(target)
+    target_list.append(target)
+    return
+
+def gen_table(boid_list):
+    grid_table = {(i,j):[] for i in range(Gx+1) for j in range(Gy+1)}
+    for b in boid_list:
+        grid_table[(b.gx,b.gy)].append(b)
+    return grid_table
     
+""" -------- CLASSES -------- """
 class Boid:
     def __init__(self,idnum=None,startpos=Vector2(random.random()*Nx, random.random()*Ny) ):
         self.id = idnum
@@ -220,37 +236,14 @@ class Wolf(Boid):
             #self.col = (0,255,0)
         self.heading_target = ((1-self.focus)*self.align_target + self.focus*goal)
         
-def debug_search(targ,rg=5):
-    neighbours = []
-    for i in range(-rg,rg+1):
-        for j in range(-rg,rg+1):
-            tx, ty = (targ.gx + i)%Gx, (targ.gy + j)%Gy
-            print(tx,ty)
-            neighbours += grid_table[(tx,ty)]
-    return [i for i in neighbours if i != targ] 
-
-def place_agents():
-    for n in range(1,N):   
-        pos = Vector2(random.random()*Nx, random.random()*Ny)
-        boid_list.append(Wolf(n,pos))
-    target = Sheep(N)
-    boid_list.append(target)
-    target_list.append(target)
-    return
-
-def gen_table(boid_list):
-    grid_table = {(i,j):[] for i in range(Gx+1) for j in range(Gy+1)}
-    for b in boid_list:
-        grid_table[(b.gx,b.gy)].append(b)
-    return grid_table
-
+""" -------- MAIN LOOP -------- """"
 grid_table = {}
 place_agents()
 grid_table = gen_table(boid_list)
-sample = boid_list[0]
-#sample.col = (0,0,0)
-#loop
+#sample = boid_list[0] #for debugging purposes only
+
 t0 = time.time()
+#MAINLOOP HERE
 while True:
     for event in pygame.event.get(): #detect events            
             if event.type == pygame.QUIT or pygame.key.get_pressed()[27]: #detect attempted exit
