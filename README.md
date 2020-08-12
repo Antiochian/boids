@@ -1,7 +1,9 @@
 # boids
-Emergent behaviour of swarming agents, visualised
+Emergent behaviour of swarming agents, visualised. The approach used is taken from ![this 1987 research paper](https://www.red3d.com/cwr/papers/1987/boids.html).
 
-This is a super useful technique for modelling crowd behaviour, with immediate canonical applications to simulating:
+I also implemented a nice spatial partitioning system which increased the frame rate from 15FPS to 200FPS. How satisfying!
+
+This is a super useful and beautifully simple technique for modelling crowd behaviour, with immediate canonical applications to simulating:
  - flocks of birds
  - shoals of fish
  - packs of animals
