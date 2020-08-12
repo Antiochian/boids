@@ -1,5 +1,5 @@
 # boids
-Emergent behaviour of swarming agents, visualised. The approach used is taken from ![this 1987 research paper](https://www.red3d.com/cwr/papers/1987/boids.html).
+Emergent behaviour of swarming agents, visualised. The approach used is taken from [this 1987 research paper](https://www.red3d.com/cwr/papers/1987/boids.html).
 
 I also implemented a nice spatial partitioning system which increased the frame rate from 15FPS to 200FPS. How satisfying!
 
